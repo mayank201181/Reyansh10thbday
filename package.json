@@ -1,0 +1,15 @@
+{
+  "name": "reyansh-10th-birthday",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "build": "echo \"Static app - no build step\""
+  },
+  "dependencies": {
+    "@vercel/blob": "^2.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

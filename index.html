@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>How Well Do You Know Reyansh?</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-topbar">
+      <button class="brand-button" type="button" data-route="play" aria-label="Go to quiz home">
+        <span class="brand-mark">R10</span>
+        <span>Reyansh Quiz</span>
+      </button>
+      <nav class="topnav" aria-label="Main views">
+        <button class="nav-button active" type="button" data-route="play">Play</button>
+        <button class="nav-button" type="button" data-route="leaderboard">Leaderboard</button>
+        <button class="nav-button" type="button" data-route="owner">Owner</button>
+      </nav>
+    </header>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <main>
+      <section id="view-play" class="view active-view" aria-labelledby="main-title">
+        <section class="hero">
+          <img class="hero-image" src="assets/birthday-quiz-banner.png" alt="Birthday quiz scene with Mumbai, cricket, balloons, and quiz cards">
+          <div class="hero-shade"></div>
+          <div class="hero-content">
+            <p class="eyebrow">10th birthday party quiz</p>
+            <h1 id="main-title">How Well Do You Know Reyansh?</h1>
+            <p class="hero-copy">Twenty quick multiple-choice questions for cousins, classmates, and family.</p>
+            <div class="hero-meta" aria-label="Quiz setup status">
+              <span id="ready-status">Checking setup</span>
+              <span id="question-count">20 questions</span>
+              <span id="result-count">0 results</span>
+            </div>
+            <form id="start-form" class="start-form">
+              <label for="player-name">Player name</label>
+              <div class="start-row">
+                <input id="player-name" name="playerName" type="text" maxlength="32" placeholder="Enter name" autocomplete="name" required>
+                <button class="primary-button" type="submit">Start Quiz</button>
+              </div>
+              <p id="setup-warning" class="setup-warning"></p>
+            </form>
+          </div>
+        </section>
+
+        <section id="quiz-shell" class="quiz-shell hidden" aria-live="polite">
+          <header class="quiz-header">
+            <div>
+              <p id="quiz-player" class="eyebrow">Player</p>
+              <h2 id="question-title">Question</h2>
+            </div>
+            <div class="quiz-progress">
+              <span id="progress-label">1 / 20</span>
+              <div class="progress-track" aria-hidden="true">
+                <span id="progress-fill"></span>
+              </div>
+            </div>
+          </header>
+          <article class="question-panel">
+            <p id="question-prompt" class="question-prompt"></p>
+            <div id="answer-options" class="answer-options" role="radiogroup" aria-label="Answer choices"></div>
+            <p id="question-note" class="question-note"></p>
+          </article>
+          <footer class="quiz-actions">
+            <button id="back-question" class="secondary-button" type="button">Back</button>
+            <button id="next-question" class="primary-button" type="button">Next</button>
+            <button id="quit-quiz" class="ghost-button" type="button">Quit</button>
+          </footer>
+        </section>
+
+        <section id="result-panel" class="result-panel hidden" aria-labelledby="result-title">
+          <div class="result-summary">
+            <p class="eyebrow">Final score</p>
+            <h2 id="result-title">Quiz complete</h2>
+            <strong id="score-line">0 / 20</strong>
+            <p id="score-message"></p>
+            <div class="result-actions">
+              <button id="play-again" class="primary-button" type="button">Play Again</button>
+              <button id="copy-result-ticket" class="secondary-button" type="button">Copy Result Ticket</button>
+              <button class="ghost-button" type="button" data-route="leaderboard">View Leaderboard</button>
+            </div>
+          </div>
+          <div id="answer-review" class="answer-review"></div>
+        </section>
+      </section>
+
+      <section id="view-leaderboard" class="view" aria-labelledby="leaderboard-title">
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">Party scoreboard</p>
+            <h1 id="leaderboard-title">Leaderboard</h1>
+          </div>
+          <button id="clear-public-results" class="secondary-button" type="button">Clear Local Results</button>
+        </div>
+        <div id="leaderboard-list" class="leaderboard-list"></div>
+      </section>
+
+      <section id="view-owner" class="view" aria-labelledby="owner-title">
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">Parent and owner setup</p>
+            <h1 id="owner-title">Owner Access</h1>
+          </div>
+          <button id="owner-lock" class="secondary-button hidden" type="button">Lock</button>
+        </div>
+
+        <section id="owner-locked" class="owner-access"></section>
+
+        <section id="owner-dashboard" class="owner-dashboard hidden">
+          <div class="owner-summary">
+            <article class="metric">
+              <span>Ready</span>
+              <strong id="metric-ready">0</strong>
+            </article>
+            <article class="metric">
+              <span>Needs edit</span>
+              <strong id="metric-draft">0</strong>
+            </article>
+            <article class="metric">
+              <span>Results</span>
+              <strong id="metric-results">0</strong>
+            </article>
+            <article class="metric">
+              <span>Owner code</span>
+              <strong id="metric-code">Set</strong>
+            </article>
+          </div>
+
+          <nav class="admin-tabs" aria-label="Owner tools">
+            <button class="admin-tab active" type="button" data-admin-panel="questions">Questions</button>
+            <button class="admin-tab" type="button" data-admin-panel="share">Share</button>
+            <button class="admin-tab" type="button" data-admin-panel="results">Results</button>
+          </nav>
+
+          <section id="admin-panel-questions" class="admin-panel active-admin-panel">
+            <div class="editor-layout">
+              <aside class="question-list-shell" aria-label="Question list">
+                <div id="admin-question-list" class="admin-question-list"></div>
+              </aside>
+              <form id="question-form" class="question-form">
+                <div class="form-row two">
+                  <label>
+                    Question number
+                    <input id="editor-number" type="text" readonly>
+                  </label>
+                  <label>
+                    Correct answer slot
+                    <select id="editor-correct-index">
+                      <option value="0">A</option>
+                      <option value="1">B</option>
+                      <option value="2">C</option>
+                      <option value="3">D</option>
+                    </select>
+                  </label>
+                </div>
+
+                <label>
+                  Question
+                  <textarea id="editor-prompt" rows="3" required></textarea>
+                </label>
+
+                <label>
+                  Correct answer
+                  <input id="editor-answer" type="text" required>
+                </label>
+
+                <div class="options-grid">
+                  <label>
+                    Option A
+                    <input id="editor-option-0" type="text" required>
+                  </label>
+                  <label>
+                    Option B
+                    <input id="editor-option-1" type="text" required>
+                  </label>
+                  <label>
+                    Option C
+                    <input id="editor-option-2" type="text" required>
+                  </label>
+                  <label>
+                    Option D
+                    <input id="editor-option-3" type="text" required>
+                  </label>
+                </div>
+
+                <label>
+                  Short reveal note
+                  <textarea id="editor-note" rows="2" placeholder="Optional line shown in answer review."></textarea>
+                </label>
+
+                <label class="checkbox-row">
+                  <input id="editor-confirmed" type="checkbox">
+                  <span>Confirmed for party</span>
+                </label>
+
+                <div class="form-actions">
+                  <button class="primary-button" type="submit">Save Question</button>
+                  <button id="restore-question" class="secondary-button" type="button">Restore Default</button>
+                </div>
+              </form>
+            </div>
+          </section>
+
+          <section id="admin-panel-share" class="admin-panel">
+            <div class="share-grid">
+              <article class="share-tool">
+                <h2>Owner Code</h2>
+                <p>Admin access uses <strong>adminmohit</strong>. You can also generate an optional owner code for this browser.</p>
+                <div class="code-output" id="generated-code">No new code generated in this session.</div>
+                <div class="button-row">
+                  <button id="generate-owner-code" class="primary-button" type="button">Generate New Code</button>
+                  <button id="copy-owner-code" class="secondary-button" type="button">Copy Code</button>
+                </div>
+              </article>
+
+              <article class="share-tool">
+                <h2>Share Links</h2>
+                <p>On Vercel, player submissions go to the shared admin dashboard. Offline/static links can still carry quiz setup in the URL.</p>
+                <div class="button-row">
+                  <button id="copy-player-link" class="primary-button" type="button">Copy Player Link</button>
+                  <button id="copy-owner-link" class="secondary-button" type="button">Copy Owner Link</button>
+                </div>
+                <button id="copy-parent-note" class="ghost-button full-button" type="button">Copy Parent Setup Note</button>
+              </article>
+
+              <article class="share-tool">
+                <h2>Import and Export</h2>
+                <p>Use a JSON file if a WhatsApp link becomes too long or if you want a backup before the party.</p>
+                <div class="button-row">
+                  <button id="download-setup" class="primary-button" type="button">Download Setup JSON</button>
+                  <button id="download-party-data" class="secondary-button" type="button">Download With Results</button>
+                </div>
+                <label class="file-import">
+                  Import JSON
+                  <input id="import-json" type="file" accept="application/json,.json">
+                </label>
+                <button id="reset-starter" class="ghost-button full-button" type="button">Reset Starter Setup</button>
+              </article>
+            </div>
+          </section>
+
+          <section id="admin-panel-results" class="admin-panel">
+            <div class="results-tools">
+              <article class="share-tool">
+                <h2>Add Result Ticket</h2>
+                <p>Use this only as a backup if someone plays offline. Normal Vercel submissions appear here automatically.</p>
+                <textarea id="result-ticket-input" rows="4" placeholder="Paste result ticket"></textarea>
+                <div class="button-row">
+                  <button id="add-result-ticket" class="primary-button" type="button">Add Ticket</button>
+                  <button id="reset-results" class="secondary-button" type="button">Reset Results</button>
+                </div>
+              </article>
+              <article class="share-tool">
+                <h2>Participants and Results</h2>
+                <div id="owner-results-list" class="mini-results"></div>
+              </article>
+            </div>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>Built for Reyansh's 10th birthday.</span>
+      <span>Owner setup is saved in this browser unless shared or exported.</span>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
