@@ -7,126 +7,14 @@ const LETTERS = ["A", "B", "C", "D"];
 const DEFAULT_QUESTIONS = [
   {
     id: "q1",
-    prompt: "Which birthday is Reyansh celebrating?",
-    options: ["10th birthday", "8th birthday", "12th birthday", "6th birthday"],
-    correctIndex: 0,
-    note: "This quiz is for Reyansh's 10th birthday.",
-    confirmed: true
-  },
-  {
-    id: "q2",
-    prompt: "Which city has Reyansh grown up in?",
-    options: ["Mumbai", "Delhi", "Jaipur", "Singapore"],
-    correctIndex: 0,
-    note: "He is a Mumbai kid, and Bombay is the older name for the city.",
-    confirmed: true
-  },
-  {
-    id: "q3",
-    prompt: "Which grade is Reyansh studying in?",
-    options: ["Grade 5", "Grade 3", "Grade 7", "Grade 1"],
-    correctIndex: 0,
-    note: "He studies in Grade 5.",
-    confirmed: true
-  },
-  {
-    id: "q4",
-    prompt: "Which curriculum does Reyansh study?",
-    options: ["CBSE", "IB", "IGCSE", "ICSE"],
-    correctIndex: 0,
-    note: "His school follows the CBSE curriculum.",
-    confirmed: true
-  },
-  {
-    id: "q5",
-    prompt: "Which school does Reyansh go to?",
-    options: ["VIBGYOR", "DPS", "Bombay Scottish", "Podar"],
-    correctIndex: 0,
-    note: "The app keeps this as VIBGYOR; parents can adjust the exact school name if needed.",
-    confirmed: true
-  },
-  {
-    id: "q6",
-    prompt: "Which sport is Reyansh known to like?",
-    options: ["Cricket", "Golf", "Table tennis", "Swimming"],
-    correctIndex: 0,
-    note: "Cricket is one of the details already known about him.",
-    confirmed: true
-  },
-  {
-    id: "q7",
-    prompt: "Which maths competition has Reyansh participated in?",
-    options: ["Maths Olympiad", "Chess Olympiad", "Science Fair", "Art Marathon"],
-    correctIndex: 0,
-    note: "He has participated in Maths Olympiad.",
-    confirmed: true
-  },
-  {
-    id: "q8",
-    prompt: "Which language competition has Reyansh participated in?",
-    options: ["Spelling Bee", "Debate League", "Drama Fest", "Poetry Slam"],
-    correctIndex: 0,
-    note: "He has participated in Spelling Bee.",
-    confirmed: true
-  },
-  {
-    id: "q9",
-    prompt: "Which city is connected to holidays on his mother's side?",
-    options: ["Jaipur", "Pune", "Kochi", "Lucknow"],
-    correctIndex: 0,
-    note: "His mother is from Jaipur, so he sometimes goes there for holidays.",
-    confirmed: true
-  },
-  {
-    id: "q10",
-    prompt: "Which of these places has Reyansh visited outside India?",
-    options: ["Singapore", "London", "Tokyo", "New York"],
-    correctIndex: 0,
-    note: "He has visited Singapore once.",
-    confirmed: true
-  },
-  {
-    id: "q11",
-    prompt: "Which other place outside India has Reyansh visited?",
-    options: ["Dubai", "Paris", "Rome", "Sydney"],
-    correctIndex: 0,
-    note: "He has also visited Dubai.",
-    confirmed: true
-  },
-  {
-    id: "q12",
-    prompt: "Who stays with Reyansh and is also Mayank uncle's mother?",
-    options: ["His grandmother", "His class teacher", "His cricket coach", "His neighbour"],
-    correctIndex: 0,
-    note: "His grandmother stays with him.",
-    confirmed: true
-  },
-  {
-    id: "q13",
-    prompt: "What are the names of Reyansh's cousin brothers from his bua's family?",
-    options: ["Fruity and Adi", "Aarav and Kabir", "Rohan and Vir", "Neil and Dev"],
-    correctIndex: 0,
-    note: "Fruity and Adi are his cousin brothers from his bua's family.",
-    confirmed: true
-  },
-  {
-    id: "q14",
-    prompt: "What are the names of Reyansh's cousin sisters from Mayank uncle's family?",
-    options: ["Vani and Vanshika", "Anaya and Myra", "Tara and Kiara", "Riya and Sara"],
-    correctIndex: 0,
-    note: "Vani and Vanshika are his cousin sisters.",
-    confirmed: true
-  },
-  {
-    id: "q15",
     prompt: "What is Reyansh's favorite color?",
     options: ["[Parents fill favorite color]", "Blue", "Red", "Green"],
     correctIndex: 0,
-    note: "Parents can fill the real answer and three believable choices.",
+    note: "Admin should replace the bracketed option with the real answer.",
     confirmed: false
   },
   {
-    id: "q16",
+    id: "q2",
     prompt: "What is Reyansh's favorite TV series or show?",
     options: ["[Parents fill favorite show]", "Doraemon", "Pokemon", "Ninja Hattori"],
     correctIndex: 0,
@@ -134,15 +22,15 @@ const DEFAULT_QUESTIONS = [
     confirmed: false
   },
   {
-    id: "q17",
+    id: "q3",
     prompt: "Which cricket team does Reyansh support most?",
     options: ["[Parents fill favorite team]", "Mumbai Indians", "India", "Chennai Super Kings"],
     correctIndex: 0,
-    note: "Parents can choose IPL team, national team, or another answer.",
+    note: "Admin can choose an IPL team, national team, or another team.",
     confirmed: false
   },
   {
-    id: "q18",
+    id: "q4",
     prompt: "Who is Reyansh's favorite cricket player?",
     options: ["[Parents fill favorite player]", "Virat Kohli", "Rohit Sharma", "MS Dhoni"],
     correctIndex: 0,
@@ -150,7 +38,7 @@ const DEFAULT_QUESTIONS = [
     confirmed: false
   },
   {
-    id: "q19",
+    id: "q5",
     prompt: "What is Reyansh's favorite food or snack?",
     options: ["[Parents fill favorite food]", "Pizza", "Pav bhaji", "Pasta"],
     correctIndex: 0,
@@ -158,11 +46,123 @@ const DEFAULT_QUESTIONS = [
     confirmed: false
   },
   {
-    id: "q20",
+    id: "q6",
     prompt: "What is Reyansh's favorite way to spend free time?",
     options: ["[Parents fill favorite pastime]", "Playing cricket", "Watching shows", "Reading comics"],
     correctIndex: 0,
     note: "Use the activity his parents think is most accurate.",
+    confirmed: false
+  },
+  {
+    id: "q7",
+    prompt: "What is Reyansh's favorite school subject?",
+    options: ["[Parents fill favorite subject]", "Maths", "Science", "English"],
+    correctIndex: 0,
+    note: "Keep the distractors close to subjects he might realistically like.",
+    confirmed: false
+  },
+  {
+    id: "q8",
+    prompt: "What is Reyansh's favorite thing to eat in his school tiffin?",
+    options: ["[Parents fill favorite tiffin item]", "Sandwich", "Paratha", "Idli"],
+    correctIndex: 0,
+    note: "This works well because classmates may have guesses.",
+    confirmed: false
+  },
+  {
+    id: "q9",
+    prompt: "What is Reyansh's favorite dessert or sweet?",
+    options: ["[Parents fill favorite dessert]", "Chocolate brownie", "Gulab jamun", "Ice cream"],
+    correctIndex: 0,
+    note: "Use a dessert he actually asks for.",
+    confirmed: false
+  },
+  {
+    id: "q10",
+    prompt: "What is Reyansh's favorite ice cream flavor?",
+    options: ["[Parents fill favorite flavor]", "Chocolate", "Vanilla", "Mango"],
+    correctIndex: 0,
+    note: "The distractors should be common flavors kids might guess.",
+    confirmed: false
+  },
+  {
+    id: "q11",
+    prompt: "What birthday cake flavor would Reyansh most likely choose?",
+    options: ["[Parents fill cake flavor]", "Chocolate", "Black forest", "Butterscotch"],
+    correctIndex: 0,
+    note: "A fun one for a 10th birthday quiz.",
+    confirmed: false
+  },
+  {
+    id: "q12",
+    prompt: "Which holiday place does Reyansh enjoy visiting most?",
+    options: ["[Parents fill favorite holiday place]", "Jaipur", "Singapore", "Dubai"],
+    correctIndex: 0,
+    note: "Use the place he would happily visit again.",
+    confirmed: false
+  },
+  {
+    id: "q13",
+    prompt: "Which city or place does Reyansh talk about the most?",
+    options: ["[Parents fill city or place]", "Mumbai", "Jaipur", "Dubai"],
+    correctIndex: 0,
+    note: "This can be a travel place, holiday place, or local Mumbai spot.",
+    confirmed: false
+  },
+  {
+    id: "q14",
+    prompt: "What game does Reyansh like playing most with friends or cousins?",
+    options: ["[Parents fill favorite game]", "Cricket", "Football", "Carrom"],
+    correctIndex: 0,
+    note: "Use a game people at the party might have seen him play.",
+    confirmed: false
+  },
+  {
+    id: "q15",
+    prompt: "What is Reyansh's favorite video game or mobile game?",
+    options: ["[Parents fill favorite game]", "Minecraft", "Roblox", "FIFA"],
+    correctIndex: 0,
+    note: "If he does not play one, admin can change this to board game or outdoor game.",
+    confirmed: false
+  },
+  {
+    id: "q16",
+    prompt: "Who is Reyansh's favorite superhero or movie character?",
+    options: ["[Parents fill favorite character]", "Spider-Man", "Iron Man", "Harry Potter"],
+    correctIndex: 0,
+    note: "Choose a character he genuinely likes.",
+    confirmed: false
+  },
+  {
+    id: "q17",
+    prompt: "What kind of books or comics does Reyansh enjoy most?",
+    options: ["[Parents fill favorite book or comic]", "Diary of a Wimpy Kid", "Tinkle", "Harry Potter"],
+    correctIndex: 0,
+    note: "Admin can make this a specific book, comic, or series.",
+    confirmed: false
+  },
+  {
+    id: "q18",
+    prompt: "What is Reyansh's favorite song or type of music?",
+    options: ["[Parents fill favorite song or music]", "Bollywood songs", "English pop", "Cricket anthems"],
+    correctIndex: 0,
+    note: "If song is too specific, use a music type.",
+    confirmed: false
+  },
+  {
+    id: "q19",
+    prompt: "Which restaurant, cafe, or food place does Reyansh like most?",
+    options: ["[Parents fill favorite food place]", "McDonald's", "Pizza place", "Ice cream shop"],
+    correctIndex: 0,
+    note: "Keep the options familiar to the children attending.",
+    confirmed: false
+  },
+  {
+    id: "q20",
+    prompt: "What would Reyansh choose first on a free weekend?",
+    options: ["[Parents fill weekend choice]", "Play cricket", "Watch a show", "Go out to eat"],
+    correctIndex: 0,
+    note: "This is a good final question because everyone can guess.",
     confirmed: false
   }
 ];
@@ -464,7 +464,7 @@ function renderHeroStatus() {
   $("#question-count").textContent = `${quiz.questions.length} questions`;
   $("#result-count").textContent = `${quiz.results.length} results`;
   $("#setup-warning").textContent = drafts
-    ? `${drafts} questions still need owner confirmation. You can preview, but finish Owner setup before the party.`
+    ? `${drafts} questions still need admin confirmation. You can preview, but finish Owner setup before the party.`
     : "Quiz is ready for party play.";
 }
 
@@ -548,7 +548,7 @@ function renderCurrentQuestion() {
   $("#progress-label").textContent = `${index + 1} / ${quiz.questions.length}`;
   $("#progress-fill").style.width = `${percent}%`;
   $("#question-prompt").textContent = question.prompt;
-  $("#question-note").textContent = question.confirmed ? "" : "Owner note: this question still needs confirmation.";
+  $("#question-note").textContent = question.confirmed ? "" : "Admin note: this question still needs confirmation.";
 
   const optionsEl = $("#answer-options");
   optionsEl.innerHTML = question.options.map((option, optionIndex) => `
@@ -847,13 +847,13 @@ function renderOwnerLocked() {
   locked.innerHTML = `
     <div class="owner-card">
       <h2>Admin Login</h2>
-      <p>Enter <strong>adminmohit</strong> to edit answers and see participants. Generated owner codes also work on this browser if one has been created.</p>
+      <p>Enter <strong>adminmohit</strong> to edit answers and see participants.</p>
       <form id="owner-login-form">
         <label>
-          Admin ID or owner code
+          Admin ID
           <input id="owner-code-input" type="password" autocomplete="current-password" required>
         </label>
-        <button class="primary-button" type="submit">Unlock Owner Tools</button>
+        <button class="primary-button" type="submit">Unlock Admin Tools</button>
         <p id="owner-error" class="setup-warning" role="status"></p>
       </form>
     </div>
@@ -871,18 +871,7 @@ function renderOwnerLocked() {
       return;
     }
 
-    if (!quiz.ownerHash) {
-      $("#owner-error").textContent = "Use adminmohit for admin access.";
-      return;
-    }
-
-    const hash = await hashCode(code);
-    if (hash !== quiz.ownerHash) {
-      $("#owner-error").textContent = "That code did not match.";
-      return;
-    }
-    unlockOwner();
-    toast("Owner tools unlocked.");
+    $("#owner-error").textContent = "Use adminmohit for admin access.";
   });
 }
 
@@ -898,12 +887,7 @@ function lockOwner() {
   sessionStorage.removeItem(ADMIN_SESSION_KEY);
   sessionStorage.removeItem(ADMIN_ID_SESSION_KEY);
   renderOwner();
-  toast("Owner tools locked.");
-}
-
-async function setOwnerCode(code) {
-  quiz.ownerHash = await hashCode(code);
-  saveQuiz({ syncServer: true });
+  toast("Admin tools locked.");
 }
 
 function renderAdminDashboard() {
@@ -911,8 +895,8 @@ function renderAdminDashboard() {
   $("#metric-ready").textContent = ready;
   $("#metric-draft").textContent = quiz.questions.length - ready;
   $("#metric-results").textContent = `${quiz.results.length}/${(quiz.participants || []).length || quiz.results.length}`;
-  $("#metric-code").textContent = state.adminId === STATIC_ADMIN_ID ? STATIC_ADMIN_ID : (quiz.ownerHash ? "Set" : "None");
-  $("#generated-code").textContent = state.lastOwnerCode || "No new code generated in this session.";
+  $("#metric-code").textContent = STATIC_ADMIN_ID;
+  $("#generated-code").textContent = state.lastOwnerCode || STATIC_ADMIN_ID;
   renderAdminPanels();
 }
 
@@ -1016,28 +1000,16 @@ function restoreSelectedQuestion() {
   toast("Question restored.");
 }
 
-async function generateNewOwnerCode() {
-  const code = generateOwnerCodeValue();
-  await setOwnerCode(code);
-  state.lastOwnerCode = code;
-  $("#generated-code").textContent = code;
-  toast("New owner code generated. Share it with the latest owner link.");
-}
-
-function generateOwnerCodeValue() {
-  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  const values = new Uint32Array(8);
-  crypto.getRandomValues(values);
-  const chars = Array.from(values, (value) => alphabet[value % alphabet.length]);
-  return `REY-${chars.slice(0, 4).join("")}-${chars.slice(4).join("")}`;
+function generateNewOwnerCode() {
+  state.lastOwnerCode = STATIC_ADMIN_ID;
+  $("#generated-code").textContent = STATIC_ADMIN_ID;
+  toast("Admin ID shown.");
 }
 
 function copyOwnerCode() {
-  if (!state.lastOwnerCode) {
-    toast("Generate a new owner code first.");
-    return;
-  }
-  copyText(state.lastOwnerCode).then(() => toast("Owner code copied."));
+  state.lastOwnerCode = STATIC_ADMIN_ID;
+  $("#generated-code").textContent = STATIC_ADMIN_ID;
+  copyText(STATIC_ADMIN_ID).then(() => toast("Admin ID copied."));
 }
 
 function copyShareLink(route) {
@@ -1054,11 +1026,6 @@ function copyShareLink(route) {
 }
 
 function copyParentNote() {
-  if (!state.serverOnline && !state.lastOwnerCode) {
-    toast("Generate a fresh owner code first so the note can include it.");
-    return;
-  }
-
   const ownerUrl = new URL(window.location.href);
   if (state.serverOnline) {
     ownerUrl.searchParams.delete("quiz");
@@ -1080,7 +1047,6 @@ function copyParentNote() {
     "",
     `Owner link: ${ownerUrl.toString()}`,
     `Admin ID: ${STATIC_ADMIN_ID}`,
-    state.lastOwnerCode ? `Optional owner code: ${state.lastOwnerCode}` : "",
     "",
     `Player link: ${playerUrl.toString()}`,
     "",
@@ -1139,7 +1105,7 @@ function importQuizFile(event) {
 }
 
 function resetStarterSetup() {
-  if (!window.confirm("Reset the quiz setup, owner code, and local results back to the starter version?")) return;
+  if (!window.confirm("Reset the quiz setup and local results back to the starter version?")) return;
   if (state.serverOnline && state.adminId === STATIC_ADMIN_ID) {
     resetSharedState("resetStarter");
     return;
@@ -1212,24 +1178,6 @@ function renderOwnerResults() {
   `).join("");
 
   container.innerHTML = `${activeRows}${resultRows}`;
-}
-
-async function hashCode(value) {
-  const normalized = String(value || "").trim().toUpperCase();
-  if (!normalized) return "";
-
-  if (window.crypto?.subtle) {
-    const bytes = new TextEncoder().encode(normalized);
-    const digest = await crypto.subtle.digest("SHA-256", bytes);
-    return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
-  }
-
-  let hash = 2166136261;
-  for (let index = 0; index < normalized.length; index += 1) {
-    hash ^= normalized.charCodeAt(index);
-    hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
-  }
-  return `fallback-${hash >>> 0}`;
 }
 
 function encodePayload(payload) {
