@@ -1,6 +1,7 @@
 const {
   buildResult,
   createParticipant,
+  dateKeyForTimestamp,
   defaultState,
   getState,
   normalizeState,
@@ -35,6 +36,22 @@ module.exports = async function handler(req, res) {
       if (!verifyAdmin(body.adminId)) return sendJson(res, 403, { error: "Admin access required" });
       state.results = [];
       state.participants = [];
+    } else if (body.action === "resetDate") {
+      if (!verifyAdmin(body.adminId)) return sendJson(res, 403, { error: "Admin access required" });
+      const targetDate = String(body.dateKey || "");
+      state.results = state.results.filter((result) => dateKeyForTimestamp(result.createdAt) !== targetDate);
+      state.participants = state.participants.filter((participant) => dateKeyForTimestamp(participant.submittedAt || participant.startedAt) !== targetDate);
+    } else if (body.action === "deleteEntry") {
+      if (!verifyAdmin(body.adminId)) return sendJson(res, 403, { error: "Admin access required" });
+      const entryId = String(body.entryId || "");
+      const removedParticipantIds = new Set(
+        state.results
+          .filter((result) => result.id === entryId || result.participantId === entryId)
+          .map((result) => result.participantId)
+          .filter(Boolean)
+      );
+      state.results = state.results.filter((result) => result.id !== entryId && result.participantId !== entryId);
+      state.participants = state.participants.filter((participant) => participant.id !== entryId && !removedParticipantIds.has(participant.id));
     } else if (body.action === "start") {
       const participant = createParticipant(body.name || "Player");
       state.participants.push(participant);

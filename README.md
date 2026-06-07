@@ -9,6 +9,7 @@ A dependency-free static web app for a "How well do you know Reyansh?" birthday 
 - Lets an owner or parent enter the correct answer and four choices for each question.
 - Admin login is checked server-side with the `ADMIN_ID` environment variable.
 - Saves shared setup, participants, and results to Vercel Blob when deployed.
+- Shows a fresh leaderboard for each India-date, with older results grouped under previous dates.
 - Exports/imports setup JSON.
 - Generates shareable player and owner links with the current quiz setup.
 - Creates result tickets so kids can play on separate devices and the host can paste their results into the leaderboard.
@@ -43,6 +44,7 @@ reyansh-10th-birthday
 - Enter the admin ID shared separately with the host/parents.
 - Fill or edit all 20 correct answers. The answer is backfilled into the selected multiple-choice slot, with three plausible distractors already present.
 - Keep the Owner tab open during the party to see in-progress participants and submitted scores. It refreshes every five seconds.
+- Use the Results tab to clear today's board, clear all dates, or remove individual leaderboard entries.
 
 ## Important Note
 

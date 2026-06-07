@@ -1,6 +1,7 @@
 const ADMIN_ID = String(process.env.ADMIN_ID || "").trim().toLowerCase();
 const STATE_KEY = process.env.QUIZ_STATE_KEY || "reyansh-10th-birthday-state-v1";
 const BLOB_STATE_PATH = process.env.QUIZ_BLOB_PATH || "reyansh-birthday-quiz/state.json";
+const LEADERBOARD_TIME_ZONE = process.env.LEADERBOARD_TIME_ZONE || "Asia/Kolkata";
 
 let memoryState;
 
@@ -205,6 +206,18 @@ function createId(prefix) {
   return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
+function dateKeyForTimestamp(value) {
+  const date = value ? new Date(value) : new Date();
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: LEADERBOARD_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(date);
+  const part = (type) => parts.find((item) => item.type === type)?.value || "";
+  return `${part("year")}-${part("month")}-${part("day")}`;
+}
+
 function hasRedis() {
   return Boolean(getRedisUrl() && getRedisToken());
 }
@@ -292,6 +305,7 @@ function sendJson(res, status, payload) {
 module.exports = {
   buildResult,
   createParticipant,
+  dateKeyForTimestamp,
   defaultState,
   getState,
   normalizeState,

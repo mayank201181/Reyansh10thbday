@@ -1,6 +1,7 @@
 const STORAGE_KEY = "reyanshBirthdayQuiz.v1";
 const ADMIN_SESSION_KEY = "reyanshBirthdayQuiz.admin";
 const ADMIN_ID_SESSION_KEY = "reyanshBirthdayQuiz.adminId";
+const LEADERBOARD_TIME_ZONE = "Asia/Kolkata";
 const LETTERS = ["A", "B", "C", "D"];
 
 const DEFAULT_QUESTIONS = [
@@ -236,6 +237,7 @@ function bindStaticEvents() {
   $("#import-json").addEventListener("change", importQuizFile);
   $("#reset-starter").addEventListener("click", resetStarterSetup);
   $("#add-result-ticket").addEventListener("click", addResultTicket);
+  $("#reset-today-results").addEventListener("click", clearTodayResults);
   $("#reset-results").addEventListener("click", clearResults);
 }
 
@@ -761,14 +763,36 @@ function addResultTicket() {
 
 function renderLeaderboard() {
   const list = $("#leaderboard-list");
-  const results = sortedResults();
+  const groups = groupedResultsByDate();
+  const today = todayDateKey();
+  const todayResults = groups.get(today) || [];
+  const previousDates = [...groups.keys()].filter((key) => key !== today).sort((a, b) => b.localeCompare(a));
 
-  if (!results.length) {
-    list.innerHTML = `<div class="empty-state">No results yet. Players will appear here after they finish the quiz on this device, or after result tickets are added by an owner.</div>`;
-    return;
-  }
+  const todaySection = `
+    <section class="leaderboard-section">
+      <div class="leaderboard-heading">
+        <h2>Today</h2>
+        <span>${escapeHtml(displayCalendarDate(today))}</span>
+      </div>
+      ${todayResults.length ? renderLeaderRows(todayResults) : `<div class="empty-state">No results for today yet.</div>`}
+    </section>
+  `;
 
-  list.innerHTML = results.map((result, index) => `
+  const previousSections = previousDates.map((dateKey) => `
+    <section class="leaderboard-section previous-day">
+      <div class="leaderboard-heading">
+        <h2>${escapeHtml(displayDate(dateKey))}</h2>
+        <span>${groups.get(dateKey).length} result${groups.get(dateKey).length === 1 ? "" : "s"}</span>
+      </div>
+      ${renderLeaderRows(groups.get(dateKey))}
+    </section>
+  `).join("");
+
+  list.innerHTML = todaySection + previousSections;
+}
+
+function renderLeaderRows(results) {
+  return sortedResults(results).map((result, index) => `
     <article class="leader-row">
       <span class="rank">${index + 1}</span>
       <span class="leader-name">${escapeHtml(result.name)}</span>
@@ -778,12 +802,22 @@ function renderLeaderboard() {
   `).join("");
 }
 
-function sortedResults() {
-  return [...quiz.results].sort((a, b) => {
+function sortedResults(results = quiz.results) {
+  return [...results].sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score;
     if (a.durationSec !== b.durationSec) return a.durationSec - b.durationSec;
     return new Date(a.createdAt) - new Date(b.createdAt);
   });
+}
+
+function groupedResultsByDate() {
+  const groups = new Map();
+  sortedResults().forEach((result) => {
+    const key = dateKey(result.createdAt);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(result);
+  });
+  return groups;
 }
 
 function clearResults() {
@@ -791,7 +825,7 @@ function clearResults() {
     toast("There are no participants or results to clear.");
     return;
   }
-  if (!window.confirm("Clear all saved quiz results on this device?")) return;
+  if (!window.confirm("Clear all leaderboard entries across all dates?")) return;
   if (state.serverOnline && state.adminId) {
     resetSharedState("resetResults");
     return;
@@ -801,6 +835,26 @@ function clearResults() {
   saveQuiz();
   renderOwnerResults();
   toast("Results cleared.");
+}
+
+function clearTodayResults() {
+  const today = todayDateKey();
+  const todaysResults = quiz.results.filter((result) => dateKey(result.createdAt) === today);
+  const todaysParticipants = (quiz.participants || []).filter((participant) => dateKey(participant.submittedAt || participant.startedAt) === today);
+  if (!todaysResults.length && !todaysParticipants.length) {
+    toast("Today's leaderboard is already empty.");
+    return;
+  }
+  if (!window.confirm("Clear today's leaderboard entries?")) return;
+  if (state.serverOnline && state.adminId) {
+    resetSharedDate(today);
+    return;
+  }
+  quiz.results = quiz.results.filter((result) => dateKey(result.createdAt) !== today);
+  quiz.participants = (quiz.participants || []).filter((participant) => dateKey(participant.submittedAt || participant.startedAt) !== today);
+  saveQuiz();
+  renderOwnerResults();
+  toast("Today's leaderboard cleared.");
 }
 
 function renderOwner() {
@@ -1180,6 +1234,46 @@ async function resetSharedState(action) {
   }
 }
 
+async function resetSharedDate(dateKeyValue) {
+  try {
+    const response = await fetch("/api/state", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ adminId: state.adminId, action: "resetDate", dateKey: dateKeyValue })
+    });
+    if (!response.ok) throw new Error("Server date reset failed");
+    applyServerPayload(await response.json());
+    renderAll();
+    toast("Today's leaderboard cleared.");
+  } catch (error) {
+    console.warn("Could not reset date", error);
+    toast("Shared date reset failed.");
+  }
+}
+
+async function deleteLeaderboardEntry(entryId, name) {
+  if (!state.adminId) {
+    toast("Admin access required.");
+    return;
+  }
+  if (!window.confirm(`Remove ${name || "this entry"} from the leaderboard?`)) return;
+
+  try {
+    const response = await fetch("/api/state", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ adminId: state.adminId, action: "deleteEntry", entryId })
+    });
+    if (!response.ok) throw new Error("Server delete failed");
+    applyServerPayload(await response.json());
+    renderAll();
+    toast("Leaderboard entry removed.");
+  } catch (error) {
+    console.warn("Could not delete leaderboard entry", error);
+    toast("Could not remove that leaderboard entry.");
+  }
+}
+
 function renderOwnerResults() {
   const container = $("#owner-results-list");
   const results = sortedResults();
@@ -1193,21 +1287,42 @@ function renderOwnerResults() {
     return;
   }
 
-  const activeRows = inProgress.map((participant) => `
-    <div class="mini-result-row">
-      <span>${escapeHtml(participant.name)}</span>
-      <strong>In progress</strong>
-    </div>
+  const groups = new Map();
+  const addRow = (key, row) => {
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(row);
+  };
+
+  inProgress.forEach((participant) => {
+    addRow(dateKey(participant.startedAt), `
+      <div class="mini-result-row">
+        <span>${escapeHtml(participant.name)}</span>
+        <strong>In progress</strong>
+        <button class="mini-remove" type="button" data-entry-id="${escapeHtml(participant.id)}" data-entry-name="${escapeHtml(participant.name)}">Remove</button>
+      </div>
+    `);
+  });
+
+  results.forEach((result) => {
+    addRow(dateKey(result.createdAt), `
+      <div class="mini-result-row">
+        <span>${escapeHtml(result.name)}</span>
+        <strong>${result.score} / ${result.total}</strong>
+        <button class="mini-remove" type="button" data-entry-id="${escapeHtml(result.id)}" data-entry-name="${escapeHtml(result.name)}">Remove</button>
+      </div>
+    `);
+  });
+
+  container.innerHTML = [...groups.keys()].sort((a, b) => b.localeCompare(a)).map((key) => `
+    <section class="mini-date-group">
+      <h3>${escapeHtml(displayDate(key))}</h3>
+      ${groups.get(key).join("")}
+    </section>
   `).join("");
 
-  const resultRows = results.map((result) => `
-    <div class="mini-result-row">
-      <span>${escapeHtml(result.name)}</span>
-      <strong>${result.score} / ${result.total}</strong>
-    </div>
-  `).join("");
-
-  container.innerHTML = `${activeRows}${resultRows}`;
+  container.querySelectorAll(".mini-remove").forEach((button) => {
+    button.addEventListener("click", () => deleteLeaderboardEntry(button.dataset.entryId, button.dataset.entryName));
+  });
 }
 
 function encodePayload(payload) {
@@ -1233,6 +1348,39 @@ function formatDuration(seconds) {
   const remainder = safeSeconds % 60;
   if (!minutes) return `${remainder}s`;
   return `${minutes}m ${String(remainder).padStart(2, "0")}s`;
+}
+
+function todayDateKey() {
+  return dateKey(new Date().toISOString());
+}
+
+function dateKey(value) {
+  const date = value ? new Date(value) : new Date();
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: LEADERBOARD_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(date);
+  const part = (type) => parts.find((item) => item.type === type)?.value || "";
+  return `${part("year")}-${part("month")}-${part("day")}`;
+}
+
+function displayDate(key) {
+  const label = displayCalendarDate(key);
+  return key === todayDateKey() ? `Today (${label})` : label;
+}
+
+function displayCalendarDate(key) {
+  const [year, month, day] = String(key || "").split("-").map(Number);
+  if (!year || !month || !day) return String(key || "");
+  const date = new Date(Date.UTC(year, month - 1, day, 12));
+  return new Intl.DateTimeFormat("en-IN", {
+    timeZone: LEADERBOARD_TIME_ZONE,
+    day: "numeric",
+    month: "short",
+    year: "numeric"
+  }).format(date);
 }
 
 function createId(prefix) {
