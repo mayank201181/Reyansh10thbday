@@ -2,6 +2,7 @@ const STORAGE_KEY = "reyanshBirthdayQuiz.v1";
 const ADMIN_SESSION_KEY = "reyanshBirthdayQuiz.admin";
 const ADMIN_ID_SESSION_KEY = "reyanshBirthdayQuiz.adminId";
 const LEADERBOARD_TIME_ZONE = "Asia/Kolkata";
+const MAX_QUESTIONS = 60;
 const LETTERS = ["A", "B", "C", "D"];
 
 const DEFAULT_QUESTIONS = [
@@ -224,6 +225,8 @@ function bindStaticEvents() {
   $("#question-form").addEventListener("input", markQuestionEditorDirty);
   $("#question-form").addEventListener("change", markQuestionEditorDirty);
   $("#restore-question").addEventListener("click", restoreSelectedQuestion);
+  $("#delete-selected-question").addEventListener("click", deleteSelectedQuestion);
+  $("#add-question-form").addEventListener("submit", addCustomQuestion);
   $("#editor-correct-index").addEventListener("change", syncEditorAnswerFromSelectedOption);
   $("#editor-answer").addEventListener("input", syncSelectedOptionFromEditorAnswer);
   [0, 1, 2, 3].forEach((index) => {
@@ -322,14 +325,10 @@ function saveQuiz(options = {}) {
 function normalizeQuiz(input) {
   const fallback = defaultQuiz();
   const incomingQuestions = Array.isArray(input?.questions) ? input.questions : fallback.questions;
-  const questions = incomingQuestions.slice(0, 20).map((question, index) => {
+  const questions = incomingQuestions.slice(0, MAX_QUESTIONS).map((question, index) => {
     const fallbackQuestion = fallback.questions[index] || fallback.questions[0];
     return normalizeQuestion(question, fallbackQuestion, index);
-  });
-
-  while (questions.length < 20) {
-    questions.push(copyQuestion(fallback.questions[questions.length]));
-  }
+  }).filter((question) => question.prompt.trim() || question.options.some((option) => option.trim()));
 
   return {
     version: 1,
@@ -337,7 +336,7 @@ function normalizeQuiz(input) {
     subtitle: String(input?.subtitle || fallback.subtitle),
     ownerHash: String(input?.ownerHash || ""),
     updatedAt: String(input?.updatedAt || new Date().toISOString()),
-    questions,
+    questions: questions.length ? questions : fallback.questions,
     results: Array.isArray(input?.results) ? input.results.map(normalizeResult).filter(Boolean) : [],
     participants: Array.isArray(input?.participants) ? input.participants.map(normalizeParticipant).filter(Boolean) : []
   };
@@ -982,6 +981,10 @@ function renderAdminPanels() {
     fillQuestionEditor();
   }
 
+  if (state.adminPanel === "manage") {
+    renderManageQuestionList();
+  }
+
   if (state.adminPanel === "results") {
     renderOwnerResults();
   }
@@ -1014,6 +1017,21 @@ function renderAdminQuestionList() {
 
 function selectedQuestion() {
   return quiz.questions.find((question) => question.id === state.selectedQuestionId) || quiz.questions[0];
+}
+
+function renderManageQuestionList() {
+  const list = $("#manage-question-list");
+  list.innerHTML = quiz.questions.map((question, index) => `
+    <div class="manage-question-row">
+      <span class="number">${index + 1}</span>
+      <span class="title">${escapeHtml(question.prompt)}</span>
+      <button class="danger-button small-button" type="button" data-delete-question="${escapeHtml(question.id)}">Delete</button>
+    </div>
+  `).join("");
+
+  list.querySelectorAll("[data-delete-question]").forEach((button) => {
+    button.addEventListener("click", () => deleteQuestionById(button.dataset.deleteQuestion));
+  });
 }
 
 function fillQuestionEditor() {
@@ -1086,8 +1104,12 @@ function saveEditedQuestion(event) {
 function restoreSelectedQuestion() {
   const current = selectedQuestion();
   const index = quiz.questions.findIndex((question) => question.id === current.id);
-  const fallback = DEFAULT_QUESTIONS[index];
-  if (!fallback || !window.confirm("Restore this question to its original starter text?")) return;
+  const fallback = DEFAULT_QUESTIONS.find((question) => question.id === current.id);
+  if (!fallback) {
+    toast("Custom questions do not have a starter version.");
+    return;
+  }
+  if (!window.confirm("Restore this question to its original starter text?")) return;
   quiz.questions[index] = copyQuestion(fallback);
   state.selectedQuestionId = quiz.questions[index].id;
   state.editorDirty = false;
@@ -1095,6 +1117,75 @@ function restoreSelectedQuestion() {
   renderAdminQuestionList();
   fillQuestionEditor();
   toast("Question restored.");
+}
+
+function addCustomQuestion(event) {
+  event.preventDefault();
+  if (quiz.questions.length >= MAX_QUESTIONS) {
+    toast(`Question limit reached (${MAX_QUESTIONS}).`);
+    return;
+  }
+
+  const prompt = $("#add-prompt").value.trim();
+  const answer = $("#add-answer").value.trim();
+  const wrongAnswers = [0, 1, 2].map((index) => $(`#add-wrong-${index}`).value.trim());
+  const correctIndex = Number($("#add-correct-index").value);
+  if (!prompt || !answer || wrongAnswers.some((value) => !value)) {
+    toast("Add the question, correct answer, and three wrong answers.");
+    return;
+  }
+
+  const options = Array(4).fill("");
+  options[correctIndex] = answer;
+  let wrongIndex = 0;
+  for (let index = 0; index < options.length; index += 1) {
+    if (index !== correctIndex) {
+      options[index] = wrongAnswers[wrongIndex];
+      wrongIndex += 1;
+    }
+  }
+
+  const question = {
+    id: createId("q"),
+    prompt,
+    options,
+    correctIndex,
+    note: $("#add-note").value.trim(),
+    confirmed: true
+  };
+
+  quiz.questions.push(question);
+  state.selectedQuestionId = question.id;
+  state.adminPanel = "questions";
+  state.editorDirty = false;
+  event.currentTarget.reset();
+  $("#add-correct-index").value = "0";
+  saveQuiz({ syncServer: true });
+  toast("Question added.");
+}
+
+function deleteSelectedQuestion() {
+  deleteQuestionById(selectedQuestion()?.id);
+}
+
+function deleteQuestionById(questionId) {
+  if (!questionId) return;
+  if (quiz.questions.length <= 1) {
+    toast("Keep at least one question in the quiz.");
+    return;
+  }
+  const index = quiz.questions.findIndex((question) => question.id === questionId);
+  if (index === -1) return;
+  const question = quiz.questions[index];
+  if (!window.confirm(`Delete question ${index + 1}: ${question.prompt}?`)) return;
+
+  quiz.questions.splice(index, 1);
+  const nextQuestion = quiz.questions[Math.min(index, quiz.questions.length - 1)];
+  state.selectedQuestionId = nextQuestion.id;
+  state.editorDirty = false;
+  saveQuiz({ syncServer: true });
+  renderManageQuestionList();
+  toast("Question deleted.");
 }
 
 function copyShareLink(route) {
@@ -1134,7 +1225,7 @@ function copyParentNote() {
     "",
     `Player link: ${playerUrl.toString()}`,
     "",
-    "Please open the Owner link, enter the admin ID shared separately, check all 20 questions, and fill the placeholders before the party."
+    "Please open the Owner link, enter the admin ID shared separately, check the questions, and fill the placeholders before the party."
   ].filter(Boolean).join("\n");
 
   copyText(note).then(() => toast("Parent setup note copied."));

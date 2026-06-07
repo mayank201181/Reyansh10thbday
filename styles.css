@@ -277,7 +277,8 @@ button:focus-visible {
 
 .primary-button,
 .secondary-button,
-.ghost-button {
+.ghost-button,
+.danger-button {
   min-height: 44px;
   border-radius: var(--radius);
   padding: 10px 14px;
@@ -309,6 +310,22 @@ button:focus-visible {
   border: 1px solid transparent;
   background: transparent;
   color: var(--ink);
+}
+
+.danger-button {
+  border: 1px solid #f1b5bd;
+  background: #fff7f8;
+  color: #9b2535;
+}
+
+.danger-button:hover {
+  background: #ffecef;
+}
+
+.small-button {
+  min-height: 34px;
+  padding: 6px 9px;
+  font-size: 0.86rem;
 }
 
 .hero .ghost-button {
@@ -668,6 +685,13 @@ button:focus-visible {
   align-items: start;
 }
 
+.manage-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.95fr) 1.05fr;
+  gap: 16px;
+  align-items: start;
+}
+
 .question-list-shell {
   max-height: 700px;
   overflow: auto;
@@ -710,7 +734,8 @@ button:focus-visible {
   font-weight: 850;
 }
 
-.question-list-button .title {
+.question-list-button .title,
+.manage-question-row .title {
   min-width: 0;
   overflow: hidden;
   color: var(--ink);
@@ -718,6 +743,29 @@ button:focus-visible {
   font-weight: 800;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.manage-question-row {
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 50px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  padding: 8px;
+}
+
+.manage-question-row .number {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: var(--radius);
+  background: #f1f4f7;
+  color: var(--ink);
+  font-weight: 850;
 }
 
 .status-dot {
@@ -922,6 +970,7 @@ button:focus-visible {
   .start-row,
   .result-panel,
   .editor-layout,
+  .manage-layout,
   .share-grid,
   .results-tools {
     grid-template-columns: 1fr;
@@ -996,6 +1045,15 @@ button:focus-visible {
 
   .mini-result-row {
     grid-template-columns: 1fr auto;
+  }
+
+  .manage-question-row {
+    grid-template-columns: 34px 1fr;
+  }
+
+  .manage-question-row .danger-button {
+    grid-column: 1 / -1;
+    width: 100%;
   }
 
   .mini-remove {

@@ -2,6 +2,7 @@ const ADMIN_ID = String(process.env.ADMIN_ID || "").trim().toLowerCase();
 const STATE_KEY = process.env.QUIZ_STATE_KEY || "reyansh-10th-birthday-state-v1";
 const BLOB_STATE_PATH = process.env.QUIZ_BLOB_PATH || "reyansh-birthday-quiz/state.json";
 const LEADERBOARD_TIME_ZONE = process.env.LEADERBOARD_TIME_ZONE || "Asia/Kolkata";
+const MAX_QUESTIONS = 60;
 
 let memoryState;
 
@@ -99,10 +100,10 @@ function storageInfo() {
 function normalizeState(input) {
   const fallbackQuestions = defaultQuestions;
   const incomingQuestions = Array.isArray(input?.questions) ? input.questions : fallbackQuestions;
-  const questions = incomingQuestions.slice(0, 20).map((question, index) => normalizeQuestion(question, fallbackQuestions[index], index));
-  while (questions.length < 20) {
-    questions.push(normalizeQuestion(fallbackQuestions[questions.length], fallbackQuestions[questions.length], questions.length));
-  }
+  const questions = incomingQuestions
+    .slice(0, MAX_QUESTIONS)
+    .map((question, index) => normalizeQuestion(question, fallbackQuestions[index], index))
+    .filter((question) => question.prompt.trim() || question.options.some((option) => option.trim()));
 
   return {
     version: 1,
@@ -110,7 +111,7 @@ function normalizeState(input) {
     subtitle: String(input?.subtitle || "10th Birthday Quiz"),
     ownerHash: String(input?.ownerHash || ""),
     updatedAt: String(input?.updatedAt || new Date().toISOString()),
-    questions,
+    questions: questions.length ? questions : defaultQuestions,
     results: Array.isArray(input?.results) ? input.results.map(normalizeResult).filter(Boolean).slice(-500) : [],
     participants: Array.isArray(input?.participants) ? input.participants.map(normalizeParticipant).filter(Boolean).slice(-500) : []
   };

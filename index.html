@@ -29,10 +29,10 @@
           <div class="hero-content">
             <p class="eyebrow">10th birthday party quiz</p>
             <h1 id="main-title">How Well Do You Know Reyansh?</h1>
-            <p class="hero-copy">Twenty quick multiple-choice questions for cousins, classmates, and family.</p>
+            <p class="hero-copy">A quick multiple-choice birthday quiz for cousins, classmates, and family.</p>
             <div class="hero-meta" aria-label="Quiz setup status">
               <span id="ready-status">Checking setup</span>
-              <span id="question-count">20 questions</span>
+              <span id="question-count">Questions</span>
               <span id="result-count">0 results</span>
             </div>
             <form id="start-form" class="start-form">
@@ -131,6 +131,7 @@
 
           <nav class="admin-tabs" aria-label="Owner tools">
             <button class="admin-tab active" type="button" data-admin-panel="questions">Questions</button>
+            <button class="admin-tab" type="button" data-admin-panel="manage">Add/Delete</button>
             <button class="admin-tab" type="button" data-admin-panel="share">Share</button>
             <button class="admin-tab" type="button" data-admin-panel="results">Results</button>
           </nav>
@@ -199,8 +200,64 @@
                 <div class="form-actions">
                   <button class="primary-button" type="submit">Save Question</button>
                   <button id="restore-question" class="secondary-button" type="button">Restore Default</button>
+                  <button id="delete-selected-question" class="danger-button" type="button">Delete Question</button>
                 </div>
               </form>
+            </div>
+          </section>
+
+          <section id="admin-panel-manage" class="admin-panel">
+            <div class="manage-layout">
+              <form id="add-question-form" class="question-form">
+                <h2>Add Question</h2>
+                <label>
+                  New question
+                  <textarea id="add-prompt" rows="3" placeholder="Example: What is Reyansh's favorite board game?" required></textarea>
+                </label>
+
+                <label>
+                  Correct answer
+                  <input id="add-answer" type="text" placeholder="Enter correct answer" required>
+                </label>
+
+                <label>
+                  Correct answer slot
+                  <select id="add-correct-index">
+                    <option value="0">A</option>
+                    <option value="1">B</option>
+                    <option value="2">C</option>
+                    <option value="3">D</option>
+                  </select>
+                </label>
+
+                <div class="options-grid">
+                  <label>
+                    Wrong answer 1
+                    <input id="add-wrong-0" type="text" required>
+                  </label>
+                  <label>
+                    Wrong answer 2
+                    <input id="add-wrong-1" type="text" required>
+                  </label>
+                  <label>
+                    Wrong answer 3
+                    <input id="add-wrong-2" type="text" required>
+                  </label>
+                </div>
+
+                <label>
+                  Short reveal note
+                  <textarea id="add-note" rows="2" placeholder="Optional line shown in answer review."></textarea>
+                </label>
+
+                <button class="primary-button" type="submit">Add Question</button>
+              </form>
+
+              <article class="share-tool">
+                <h2>Delete Questions</h2>
+                <p>Remove any starter or custom question. Keep at least one question in the quiz.</p>
+                <div id="manage-question-list" class="admin-question-list"></div>
+              </article>
             </div>
           </section>
 

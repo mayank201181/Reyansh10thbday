@@ -5,8 +5,9 @@ A dependency-free static web app for a "How well do you know Reyansh?" birthday 
 ## What It Does
 
 - Runs as a static app, so it can be deployed directly on Vercel.
-- Includes 20 parent-fill personal-preference question slots.
+- Starts with 20 parent-fill personal-preference question slots.
 - Lets an owner or parent enter the correct answer and four choices for each question.
+- Lets an owner add custom questions and delete starter/custom questions.
 - Admin login is checked server-side with the `ADMIN_ID` environment variable.
 - Saves shared setup, participants, and results to Vercel Blob when deployed.
 - Shows a fresh leaderboard for each India-date, with older results grouped under previous dates.
@@ -42,7 +43,8 @@ reyansh-10th-birthday
 
 - Open the Owner tab.
 - Enter the admin ID shared separately with the host/parents.
-- Fill or edit all 20 correct answers. The answer is backfilled into the selected multiple-choice slot, with three plausible distractors already present.
+- Fill or edit correct answers. The answer is backfilled into the selected multiple-choice slot, with three plausible distractors already present.
+- Use the Add/Delete tab to add extra questions or remove starter/custom questions.
 - Keep the Owner tab open during the party to see in-progress participants and submitted scores. It refreshes every five seconds.
 - Use the Results tab to clear today's board, clear all dates, or remove individual leaderboard entries.
 
