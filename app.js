@@ -220,8 +220,11 @@ function bindStaticEvents() {
 
   $("#question-form").addEventListener("submit", saveEditedQuestion);
   $("#restore-question").addEventListener("click", restoreSelectedQuestion);
-  $("#editor-correct-index").addEventListener("change", syncSelectedOptionFromEditorAnswer);
+  $("#editor-correct-index").addEventListener("change", syncEditorAnswerFromSelectedOption);
   $("#editor-answer").addEventListener("input", syncSelectedOptionFromEditorAnswer);
+  [0, 1, 2, 3].forEach((index) => {
+    $(`#editor-option-${index}`).addEventListener("input", () => syncEditorAnswerFromOption(index));
+  });
   $("#copy-player-link").addEventListener("click", () => copyShareLink("play"));
   $("#copy-owner-link").addEventListener("click", () => copyShareLink("owner"));
   $("#copy-parent-note").addEventListener("click", copyParentNote);
@@ -972,6 +975,17 @@ function fillQuestionEditor() {
 function syncSelectedOptionFromEditorAnswer() {
   const index = Number($("#editor-correct-index").value);
   $(`#editor-option-${index}`).value = $("#editor-answer").value;
+}
+
+function syncEditorAnswerFromSelectedOption() {
+  const index = Number($("#editor-correct-index").value);
+  $("#editor-answer").value = $(`#editor-option-${index}`).value;
+}
+
+function syncEditorAnswerFromOption(index) {
+  if (Number($("#editor-correct-index").value) === index) {
+    $("#editor-answer").value = $(`#editor-option-${index}`).value;
+  }
 }
 
 function saveEditedQuestion(event) {
