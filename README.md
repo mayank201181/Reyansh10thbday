@@ -7,7 +7,7 @@ A dependency-free static web app for a "How well do you know Reyansh?" birthday 
 - Runs as a static app, so it can be deployed directly on Vercel.
 - Includes 20 parent-fill personal-preference question slots.
 - Lets an owner or parent enter the correct answer and four choices for each question.
-- Admin login is restricted to `adminmohit`.
+- Admin login is checked server-side with the `ADMIN_ID` environment variable.
 - Saves shared setup, participants, and results to Vercel Blob when deployed.
 - Exports/imports setup JSON.
 - Generates shareable player and owner links with the current quiz setup.
@@ -40,13 +40,13 @@ reyansh-10th-birthday
 ## Admin Flow
 
 - Open the Owner tab.
-- Enter admin ID: `adminmohit`.
+- Enter the admin ID shared separately with the host/parents.
 - Fill or edit all 20 correct answers. The answer is backfilled into the selected multiple-choice slot, with three plausible distractors already present.
 - Keep the Owner tab open during the party to see in-progress participants and submitted scores. It refreshes every five seconds.
 
 ## Important Note
 
-This is a family-party app, not a high-security exam system. The admin ID gates the editing UI and API, but it is intentionally simple because the requested admin ID is shared text.
+This is a family-party app, not a high-security exam system. The admin ID gates the editing UI and API, and the value should be set as `ADMIN_ID` in Vercel instead of being written into the public app.
 
 Shared scoring uses Vercel Blob through `BLOB_READ_WRITE_TOKEN`. The Vercel CLI-created Blob store is connected to the project and the token is stored in Vercel/project env, not in git.
 

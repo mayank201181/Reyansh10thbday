@@ -1,4 +1,4 @@
-const ADMIN_ID = (process.env.ADMIN_ID || "adminmohit").trim().toLowerCase();
+const ADMIN_ID = String(process.env.ADMIN_ID || "").trim().toLowerCase();
 const STATE_KEY = process.env.QUIZ_STATE_KEY || "reyansh-10th-birthday-state-v1";
 const BLOB_STATE_PATH = process.env.QUIZ_BLOB_PATH || "reyansh-birthday-quiz/state.json";
 
@@ -84,13 +84,12 @@ async function saveState(state) {
 }
 
 function verifyAdmin(adminId) {
-  return String(adminId || "").trim().toLowerCase() === ADMIN_ID;
+  return Boolean(ADMIN_ID && String(adminId || "").trim().toLowerCase() === ADMIN_ID);
 }
 
 function storageInfo() {
   const mode = hasBlob() ? "vercel-blob" : (hasRedis() ? "redis-rest" : "memory-fallback");
   return {
-    adminId: ADMIN_ID,
     durable: hasBlob() || hasRedis(),
     mode
   };

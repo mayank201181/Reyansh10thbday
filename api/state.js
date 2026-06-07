@@ -25,7 +25,10 @@ module.exports = async function handler(req, res) {
     const body = await readJson(req);
     let state = await getState();
 
-    if (body.action === "resetStarter") {
+    if (body.action === "verifyAdmin") {
+      if (!verifyAdmin(body.adminId)) return sendJson(res, 403, { error: "Admin access required" });
+      return sendJson(res, 200, { quiz: state, storage: storageInfo(), admin: true });
+    } else if (body.action === "resetStarter") {
       if (!verifyAdmin(body.adminId)) return sendJson(res, 403, { error: "Admin access required" });
       state = defaultState();
     } else if (body.action === "resetResults") {

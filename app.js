@@ -1,7 +1,6 @@
 const STORAGE_KEY = "reyanshBirthdayQuiz.v1";
 const ADMIN_SESSION_KEY = "reyanshBirthdayQuiz.admin";
 const ADMIN_ID_SESSION_KEY = "reyanshBirthdayQuiz.adminId";
-const STATIC_ADMIN_ID = "adminmohit";
 const LETTERS = ["A", "B", "C", "D"];
 
 const DEFAULT_QUESTIONS = [
@@ -177,7 +176,6 @@ let state = {
   selectedQuestionId: "q1",
   game: null,
   lastResult: null,
-  lastOwnerCode: "",
   serverOnline: false,
   storageMode: "local",
   durableStorage: false
@@ -222,9 +220,8 @@ function bindStaticEvents() {
 
   $("#question-form").addEventListener("submit", saveEditedQuestion);
   $("#restore-question").addEventListener("click", restoreSelectedQuestion);
-  $("#editor-correct-index").addEventListener("change", syncEditorAnswerFromSelectedOption);
-  $("#generate-owner-code").addEventListener("click", generateNewOwnerCode);
-  $("#copy-owner-code").addEventListener("click", copyOwnerCode);
+  $("#editor-correct-index").addEventListener("change", syncSelectedOptionFromEditorAnswer);
+  $("#editor-answer").addEventListener("input", syncSelectedOptionFromEditorAnswer);
   $("#copy-player-link").addEventListener("click", () => copyShareLink("play"));
   $("#copy-owner-link").addEventListener("click", () => copyShareLink("owner"));
   $("#copy-parent-note").addEventListener("click", copyParentNote);
@@ -421,7 +418,7 @@ function applyServerPayload(data) {
 }
 
 async function syncQuizToServer() {
-  if (!state.serverOnline || state.adminId !== STATIC_ADMIN_ID) return;
+  if (!state.serverOnline || !state.adminId) return;
 
   try {
     const response = await fetch("/api/state", {
@@ -789,7 +786,7 @@ function clearResults() {
     return;
   }
   if (!window.confirm("Clear all saved quiz results on this device?")) return;
-  if (state.serverOnline && state.adminId === STATIC_ADMIN_ID) {
+  if (state.serverOnline && state.adminId) {
     resetSharedState("resetResults");
     return;
   }
@@ -818,7 +815,7 @@ function renderOwner() {
 }
 
 function startAdminRefresh() {
-  if (adminRefreshTimer || state.adminId !== STATIC_ADMIN_ID || !state.serverOnline) return;
+  if (adminRefreshTimer || !state.adminId || !state.serverOnline) return;
   adminRefreshTimer = window.setInterval(refreshAdminState, 5000);
 }
 
@@ -829,7 +826,7 @@ function stopAdminRefresh() {
 }
 
 async function refreshAdminState() {
-  if (state.adminId !== STATIC_ADMIN_ID || !state.serverOnline || state.route !== "owner") return;
+  if (!state.adminId || !state.serverOnline || state.route !== "owner") return;
   try {
     const response = await fetch("/api/state", { cache: "no-store" });
     if (!response.ok) throw new Error("Admin refresh failed");
@@ -847,7 +844,7 @@ function renderOwnerLocked() {
   locked.innerHTML = `
     <div class="owner-card">
       <h2>Admin Login</h2>
-      <p>Enter <strong>adminmohit</strong> to edit answers and see participants.</p>
+      <p>Enter the admin ID to edit answers and see participants.</p>
       <form id="owner-login-form">
         <label>
           Admin ID
@@ -862,16 +859,27 @@ function renderOwnerLocked() {
   $("#owner-login-form").addEventListener("submit", async (event) => {
     event.preventDefault();
     const code = $("#owner-code-input").value.trim();
-    if (code.toLowerCase() === STATIC_ADMIN_ID) {
-      state.adminId = STATIC_ADMIN_ID;
-      sessionStorage.setItem(ADMIN_ID_SESSION_KEY, STATIC_ADMIN_ID);
-      await hydrateFromServer();
+    const error = $("#owner-error");
+    error.textContent = "";
+
+    try {
+      const response = await fetch("/api/state", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "verifyAdmin", adminId: code })
+      });
+      if (!response.ok) throw new Error("Admin ID not accepted");
+      state.adminId = code;
+      sessionStorage.setItem(ADMIN_ID_SESSION_KEY, code);
+      applyServerPayload(await response.json());
       unlockOwner();
       toast("Admin tools unlocked.");
       return;
+    } catch (loginError) {
+      console.warn("Admin login failed", loginError);
     }
 
-    $("#owner-error").textContent = "Use adminmohit for admin access.";
+    error.textContent = "Admin ID not accepted.";
   });
 }
 
@@ -895,8 +903,7 @@ function renderAdminDashboard() {
   $("#metric-ready").textContent = ready;
   $("#metric-draft").textContent = quiz.questions.length - ready;
   $("#metric-results").textContent = `${quiz.results.length}/${(quiz.participants || []).length || quiz.results.length}`;
-  $("#metric-code").textContent = STATIC_ADMIN_ID;
-  $("#generated-code").textContent = state.lastOwnerCode || STATIC_ADMIN_ID;
+  $("#metric-code").textContent = state.adminAuthed ? "Unlocked" : "Locked";
   renderAdminPanels();
 }
 
@@ -959,12 +966,9 @@ function fillQuestionEditor() {
   $("#editor-confirmed").checked = question.confirmed;
 }
 
-function syncEditorAnswerFromSelectedOption() {
+function syncSelectedOptionFromEditorAnswer() {
   const index = Number($("#editor-correct-index").value);
-  const optionValue = $(`#editor-option-${index}`).value.trim();
-  if (optionValue && !isPlaceholder(optionValue)) {
-    $("#editor-answer").value = optionValue;
-  }
+  $(`#editor-option-${index}`).value = $("#editor-answer").value;
 }
 
 function saveEditedQuestion(event) {
@@ -998,18 +1002,6 @@ function restoreSelectedQuestion() {
   renderAdminQuestionList();
   fillQuestionEditor();
   toast("Question restored.");
-}
-
-function generateNewOwnerCode() {
-  state.lastOwnerCode = STATIC_ADMIN_ID;
-  $("#generated-code").textContent = STATIC_ADMIN_ID;
-  toast("Admin ID shown.");
-}
-
-function copyOwnerCode() {
-  state.lastOwnerCode = STATIC_ADMIN_ID;
-  $("#generated-code").textContent = STATIC_ADMIN_ID;
-  copyText(STATIC_ADMIN_ID).then(() => toast("Admin ID copied."));
 }
 
 function copyShareLink(route) {
@@ -1046,11 +1038,10 @@ function copyParentNote() {
     "Hi, here is Reyansh's 10th birthday quiz setup.",
     "",
     `Owner link: ${ownerUrl.toString()}`,
-    `Admin ID: ${STATIC_ADMIN_ID}`,
     "",
     `Player link: ${playerUrl.toString()}`,
     "",
-    "Please open the Owner link, enter the admin ID, check all 20 questions, and fill the placeholders before the party."
+    "Please open the Owner link, enter the admin ID shared separately, check all 20 questions, and fill the placeholders before the party."
   ].filter(Boolean).join("\n");
 
   copyText(note).then(() => toast("Parent setup note copied."));
@@ -1106,7 +1097,7 @@ function importQuizFile(event) {
 
 function resetStarterSetup() {
   if (!window.confirm("Reset the quiz setup and local results back to the starter version?")) return;
-  if (state.serverOnline && state.adminId === STATIC_ADMIN_ID) {
+  if (state.serverOnline && state.adminId) {
     resetSharedState("resetStarter");
     return;
   }
@@ -1117,7 +1108,6 @@ function resetStarterSetup() {
   state.selectedQuestionId = "q1";
   state.game = null;
   state.lastResult = null;
-  state.lastOwnerCode = "";
   sessionStorage.removeItem(ADMIN_SESSION_KEY);
   sessionStorage.removeItem(ADMIN_ID_SESSION_KEY);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(quiz));
