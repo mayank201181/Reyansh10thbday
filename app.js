@@ -174,6 +174,7 @@ let state = {
   adminId: sessionStorage.getItem(ADMIN_ID_SESSION_KEY) || "",
   adminPanel: "questions",
   selectedQuestionId: "q1",
+  editorDirty: false,
   game: null,
   lastResult: null,
   serverOnline: false,
@@ -219,6 +220,8 @@ function bindStaticEvents() {
   });
 
   $("#question-form").addEventListener("submit", saveEditedQuestion);
+  $("#question-form").addEventListener("input", markQuestionEditorDirty);
+  $("#question-form").addEventListener("change", markQuestionEditorDirty);
   $("#restore-question").addEventListener("click", restoreSelectedQuestion);
   $("#editor-correct-index").addEventListener("change", syncEditorAnswerFromSelectedOption);
   $("#editor-answer").addEventListener("input", syncSelectedOptionFromEditorAnswer);
@@ -830,6 +833,7 @@ function stopAdminRefresh() {
 
 async function refreshAdminState() {
   if (!state.adminId || !state.serverOnline || state.route !== "owner") return;
+  if (state.adminPanel === "questions" && isQuestionEditorActive()) return;
   try {
     const response = await fetch("/api/state", { cache: "no-store" });
     if (!response.ok) throw new Error("Admin refresh failed");
@@ -961,15 +965,18 @@ function selectedQuestion() {
 function fillQuestionEditor() {
   const question = selectedQuestion();
   const number = quiz.questions.findIndex((item) => item.id === question.id) + 1;
+  const answer = question.options[question.correctIndex] || "";
   $("#editor-number").value = String(number);
   $("#editor-prompt").value = question.prompt;
   $("#editor-correct-index").value = String(question.correctIndex);
-  $("#editor-answer").value = question.options[question.correctIndex] || "";
+  $("#editor-answer").value = isPlaceholder(answer) ? "" : answer;
+  $("#editor-answer").placeholder = isPlaceholder(answer) ? answer : "Enter correct answer";
   question.options.forEach((option, index) => {
     $(`#editor-option-${index}`).value = option;
   });
   $("#editor-note").value = question.note || "";
   $("#editor-confirmed").checked = question.confirmed;
+  state.editorDirty = false;
 }
 
 function syncSelectedOptionFromEditorAnswer() {
@@ -979,13 +986,26 @@ function syncSelectedOptionFromEditorAnswer() {
 
 function syncEditorAnswerFromSelectedOption() {
   const index = Number($("#editor-correct-index").value);
-  $("#editor-answer").value = $(`#editor-option-${index}`).value;
+  const optionValue = $(`#editor-option-${index}`).value;
+  $("#editor-answer").value = isPlaceholder(optionValue) ? "" : optionValue;
+  $("#editor-answer").placeholder = isPlaceholder(optionValue) ? optionValue : "Enter correct answer";
 }
 
 function syncEditorAnswerFromOption(index) {
   if (Number($("#editor-correct-index").value) === index) {
-    $("#editor-answer").value = $(`#editor-option-${index}`).value;
+    const optionValue = $(`#editor-option-${index}`).value;
+    $("#editor-answer").value = isPlaceholder(optionValue) ? "" : optionValue;
+    $("#editor-answer").placeholder = isPlaceholder(optionValue) ? optionValue : "Enter correct answer";
   }
+}
+
+function markQuestionEditorDirty() {
+  state.editorDirty = true;
+}
+
+function isQuestionEditorActive() {
+  const form = $("#question-form");
+  return Boolean(state.editorDirty || (form && form.contains(document.activeElement)));
 }
 
 function saveEditedQuestion(event) {
@@ -1001,6 +1021,7 @@ function saveEditedQuestion(event) {
   question.correctIndex = correctIndex;
   question.note = $("#editor-note").value.trim();
   question.confirmed = $("#editor-confirmed").checked;
+  state.editorDirty = false;
 
   saveQuiz({ syncServer: true });
   renderAdminQuestionList();
@@ -1015,6 +1036,7 @@ function restoreSelectedQuestion() {
   if (!fallback || !window.confirm("Restore this question to its original starter text?")) return;
   quiz.questions[index] = copyQuestion(fallback);
   state.selectedQuestionId = quiz.questions[index].id;
+  state.editorDirty = false;
   saveQuiz({ syncServer: true });
   renderAdminQuestionList();
   fillQuestionEditor();
@@ -1123,6 +1145,7 @@ function resetStarterSetup() {
   state.adminId = "";
   state.adminPanel = "questions";
   state.selectedQuestionId = "q1";
+  state.editorDirty = false;
   state.game = null;
   state.lastResult = null;
   sessionStorage.removeItem(ADMIN_SESSION_KEY);
