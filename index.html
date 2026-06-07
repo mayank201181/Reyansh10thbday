@@ -141,6 +141,16 @@
                 <div id="admin-question-list" class="admin-question-list"></div>
               </aside>
               <form id="question-form" class="question-form">
+                <label>
+                  Question
+                  <textarea id="editor-prompt" rows="3" required></textarea>
+                </label>
+
+                <label>
+                  Parent answer (correct)
+                  <input id="editor-answer" type="text" placeholder="Enter correct answer" required>
+                </label>
+
                 <div class="form-row two">
                   <label>
                     Question number
@@ -156,16 +166,6 @@
                     </select>
                   </label>
                 </div>
-
-                <label>
-                  Question
-                  <textarea id="editor-prompt" rows="3" required></textarea>
-                </label>
-
-                <label>
-                  Parent answer (correct)
-                  <input id="editor-answer" type="text" placeholder="Enter correct answer" required>
-                </label>
 
                 <div class="options-grid">
                   <label>

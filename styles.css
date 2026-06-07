@@ -714,6 +714,7 @@ button:focus-visible {
   display: grid;
   gap: 14px;
   padding: 18px;
+  scroll-margin-top: 18px;
 }
 
 .form-row.two,
@@ -901,6 +902,14 @@ button:focus-visible {
   .answer-options,
   .owner-summary {
     grid-template-columns: 1fr;
+  }
+
+  .question-form {
+    order: -1;
+  }
+
+  .question-list-shell {
+    max-height: 420px;
   }
 }
 

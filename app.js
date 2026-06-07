@@ -944,6 +944,9 @@ function renderAdminQuestionList() {
       state.selectedQuestionId = button.dataset.id;
       renderAdminQuestionList();
       fillQuestionEditor();
+      if (window.matchMedia("(max-width: 900px)").matches) {
+        $("#question-form").scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     });
   });
 }
